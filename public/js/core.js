@@ -5,15 +5,20 @@ $(function() {
 
   $('.forward').on('click', function() {
     komponist.next();
+
+    updateInfo();
   });
 
   $('.backward').on('click', function() {
     komponist.previous();
+
+    updateInfo();
   });
 
   $('.play, .pause').on('click', function() {
     $('.play').toggle();
     $('.pause').toggle();
+
     komponist.toggle();
   })
 
@@ -31,8 +36,10 @@ $(function() {
     checkInputs($channelTpl, $e);
     checkSelected($e);
   });
+
   checkInputs($channelTpl);
   checkSelected();
+  updateInfo();
 });
 
 function getChannelTemplate() {
@@ -64,3 +71,12 @@ function checkSelected($e) {
   if($e) $e.addClass('selected');
 }
 
+function updateInfo() {
+  komponist.currentsong(function(err, data) {
+    var info = [data.Name, data.Title].filter(id).join(' - ');
+
+    $('.info').text(info);
+  });
+}
+
+function id(a) {return a;}
