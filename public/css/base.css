@@ -43,6 +43,10 @@ body {
   background: -webkit-linear-gradient(top, #ccc 0%,#555 100%);
 }
 
+.button:active {
+  box-shadow: none;
+}
+
 .backward.button {
   margin-right: -0.8em;
 }
