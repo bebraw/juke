@@ -1,0 +1,163 @@
+h1, h2, h3, h4 {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  font-family: sans-serif;
+}
+
+body {
+  background: #222;
+}
+
+.app {
+  margin: 1em;
+  max-width: 500px;
+
+  border-radius: 0.5em;
+}
+
+.info {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1em;
+  background: #afa;
+
+  box-shadow: inset 0px 0px 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5em;
+}
+
+.button {
+  display: inline-block;
+
+  height: 3em;
+  width: 3em;
+  position: relative;
+  color: white;
+  text-align: center;
+  line-height: 3em;
+
+  border-radius: 100em;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  background: -webkit-linear-gradient(top, #ccc 0%,#555 100%);
+}
+
+.backward.button {
+  margin-right: -0.8em;
+}
+
+.forward.button {
+  margin-left: -0.8em;
+}
+
+.play.button .icon::before {
+  vertical-align: -20%;
+}
+
+.pause.button {
+  display: none;
+}
+
+.big.button {
+  width: 6em;
+  height: 6em;
+  line-height: 6em;
+  z-index: 2;
+}
+
+.small.button {
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+}
+
+.footer {
+  overflow: auto;
+}
+
+.edit.button {
+  float: right;
+
+  margin: 0.5em;
+  cursor: default;
+}
+
+.edit.button .icon {
+  margin-right: 0.2em;
+}
+
+.backward.button .icon {
+  margin-right: 0.6em;
+}
+
+.pause.button .icon {
+  margin-right: 0.1em;
+}
+
+/* General Layout */
+.header, .options {
+  padding: 1em;
+}
+
+.header {
+  background: -webkit-linear-gradient(top, #bbb, #666);
+  border-radius: 0.5em 0.5em 0 0;
+}
+
+.controls {
+  padding-top: 0.5em;
+  padding-bottom: 1em;
+  text-align: center;
+
+  background: -webkit-linear-gradient(top, #666, #444);
+}
+
+.options {
+  background: #888;
+  margin-right: 1em;
+  margin-left: 1em;
+  padding: 0;
+
+  background: -webkit-linear-gradient(top, #999, #444);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,1);
+}
+
+.options h2 {
+  padding: 0.5em 0 0 0.5em;
+  font-size: 1em;
+}
+
+.options .channels {
+  margin: 0.5em 0 1em 0;
+  padding: 0 0.5em 0 0.5em;
+
+  list-style: none;
+}
+
+.options input {
+  width: 100%;
+  border-radius: 0.5em;
+  border: 2px solid #bbb;
+  background: #cdc;
+}
+
+.options .selected.channel {
+  background: #aea;
+}
+
+.footer {
+  background: -webkit-linear-gradient(top, #555, #777);
+  border-radius: 0 0 0.5em 0.5em;
+}
+
+/* Animations */
+.options {
+  overflow: auto;
+  max-height: 0%;
+  -webkit-transition: all 0.5s ease-in-out;
+}
+
+.options.visible {
+  max-height: 100%;
+}

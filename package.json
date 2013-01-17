@@ -5,7 +5,8 @@
   "version": "0.1.0",
 
   "dependencies": {
-    "komponist": "== 0.0.3"
+    "komponist": "== 0.0.3",
+    "express": "== 3.0.6"
   },
 
   "devDependencies": {
@@ -20,7 +21,7 @@
   },
 
   "scripts": {
-    "make": "node_modules/browserify/bin/cmd.js js/client.js -o js/client.build.js"
+    "make": "node_modules/browserify/bin/cmd.js public/js/client.js -o public/js/client.build.js"
   },
 
   "homepage": "https://github.com/bebraw/juke",
