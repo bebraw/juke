@@ -55,10 +55,6 @@ body {
   vertical-align: -20%;
 }
 
-.pause.button {
-  display: none;
-}
-
 .big.button {
   width: 6em;
   height: 6em;

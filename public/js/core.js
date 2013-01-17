@@ -3,6 +3,23 @@ $(function() {
     $('.options').toggleClass('visible');
   });
 
+  $('.forward').on('click', function() {
+    komponist.next();
+  });
+
+  $('.backward').on('click', function() {
+    komponist.previous();
+  });
+
+  $('.play, .pause').on('click', function() {
+    $('.play').toggle();
+    $('.pause').toggle();
+    komponist.toggle();
+  })
+
+  // TODO: set visibility state whether or not playback is on
+  $('.pause').hide();
+
   var $channelTpl = getChannelTemplate();
   $(document).on('click', '.channel', function() {
     var $e = $(this);
