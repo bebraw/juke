@@ -37,6 +37,12 @@ $(function() {
     checkSelected($e);
   });
 
+  komponist.on('changed', function(system) {
+    if(system !== 'player') return;
+
+    updateInfo();
+  });
+
   checkInputs($channelTpl);
   checkSelected();
   updateInfo();
