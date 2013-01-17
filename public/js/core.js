@@ -8,13 +8,13 @@ $(function() {
   });
 
   $('.forward').on('click', function() {
-    komponist.next();
+    MPDnext();
 
     updateInfo();
   });
 
   $('.backward').on('click', function() {
-    komponist.previous();
+    MPDprevious();
 
     updateInfo();
   });
@@ -24,7 +24,7 @@ $(function() {
     $('.pause').toggle();
 
     komponist.toggle();
-  })
+  });
 
   var $channelTpl = getChannelTemplate();
   $(document).on('click', '.channel', function() {
@@ -45,18 +45,16 @@ $(function() {
   });
   komponist.once('ready', updateInfo);
 
-  checkInputs($channelTpl);
-  checkSelected();
   updateInfo();
   updatePlayPause();
+  updatePlaylist($channelTpl, function() {
+    checkSelected();
+    checkInputs($channelTpl);
+  });
 });
 
 function getChannelTemplate() {
-  var $e = $('.channel:first').parent().clone();
-
-  $('.channel', $e).val('');
-
-  return $e;
+  return $('.channel:first').parent().clone();
 }
 
 function checkInputs($tpl, $e) {
@@ -93,6 +91,36 @@ function updatePlayPause() {
     $('.play, .pause').show();
     $('.' + data.state).hide();
   });
+}
+
+function updatePlaylist($tpl, done) {
+  komponist.playlistinfo(function(err, data) {
+    var $c = $('.channels');
+
+    $c.empty();
+
+    $.each(data, function(i, v) {
+        var $e = $tpl.clone();
+
+        $('.channel', $e).val(v.file);
+
+        $c.append($e);
+    });
+
+    done();
+  });
+}
+
+function MPDnext() {
+  komponist.playlistinfo(function(err, data) {
+    console.log(data);
+  });
+
+  //komponist.next();
+}
+
+function MPDprevious() {
+  komponist.previous();
 }
 
 function id(a) {return a;}
