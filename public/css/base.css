@@ -110,6 +110,8 @@ body {
 }
 
 .options {
+  max-height: 0px;
+  overflow: auto;
   background: #888;
   margin-right: 1em;
   margin-left: 1em;
@@ -145,15 +147,4 @@ body {
 .footer {
   background: -webkit-linear-gradient(top, #555, #777);
   border-radius: 0 0 0.5em 0.5em;
-}
-
-/* Animations */
-.options {
-  overflow: auto;
-  max-height: 0%;
-  -webkit-transition: all 0.5s ease-in-out;
-}
-
-.options.visible {
-  max-height: 100%;
 }

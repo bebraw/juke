@@ -1,6 +1,10 @@
 $(function() {
   $('.edit').on('click', function() {
-    $('.options').toggleClass('visible');
+    var $opts = $('.options').toggleClass('visible');
+
+    $opts.animate({
+      'max-height': $opts.hasClass('visible')? '1000px': 0
+    });
   });
 
   $('.forward').on('click', function() {
