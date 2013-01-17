@@ -4,12 +4,7 @@ var http = require('http');
 var path = require('path');
 var fs = require('fs');
 
-main({
-    ports: {
-        server: 8000,
-        mpd: 6600
-    }
-});
+main(require('./conf.json'));
 
 function main(conf) {
     var server = http.createServer(function(req, res) {
