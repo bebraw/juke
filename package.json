@@ -12,11 +12,15 @@
     "browserify": "== 1.17.2"
   },
 
-  "main": "./juke/server.js",
+  "main": "server.js",
 
   "repository": {
     "type": "git",
     "url": "git@github.com:bebraw/juke.git"
+  },
+
+  "scripts": {
+    "make": "node_modules/browserify/bin/cmd.js src/client.js -o src/client.build.js"
   },
 
   "homepage": "https://github.com/bebraw/juke",
