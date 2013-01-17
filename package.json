@@ -6,8 +6,7 @@
 
   "dependencies": {
     "komponist": "== 0.0.3",
-    "express": "== 3.0.6",
-    "shoe": "== 0.0.7"
+    "node-static": "== 0.6.5"
   },
 
   "devDependencies": {

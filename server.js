@@ -1,6 +1,5 @@
 var komponist = require('komponist');
-var express = require('express');
-var shoe = require('shoe');
+var static = require('node-static');
 
 try { net = require('net'); } catch(e) {}
 
@@ -11,15 +10,14 @@ var fs = require('fs');
 main(require('./conf.json'));
 
 function main(conf) {
-    var server = express();
+    var file = new(static.Server)('./public');
 
-    server.configure(function() {
-        server.use(express.logger())
-            .use(express.static(__dirname + '/public'));
-    });
+    var server = http.createServer(function(req, res) {
+        if(req.url === '/') req.url = 'index.html';
 
-    server.get('/', function(req, res) {
-        res.redirect('index.html');
+        req.addListener('end', function() {
+            file.serve(req, res);
+        });
     });
 
     var serv = server.listen(conf.ports.server, function() {
@@ -30,15 +28,5 @@ function main(conf) {
 }
 
 function installKomponist(server, port) {
-     var sock = shoe(function(stream) {
-        var client = net.createConnection('localhost', port);
-
-        client.pipe(stream);
-
-        stream.on('data', function(data) {
-            client.write(data);
-        });
-    });
-
-    sock.install(server, '/komponist');
+    komponist.install(server, 'localhost', port);
 }
