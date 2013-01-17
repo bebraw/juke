@@ -11,7 +11,7 @@ function main(conf) {
     var server = express();
 
     server.configure(function() {
-        server.use(express.logger(__dirname + '/dev'))
+        server.use(express.logger())
             .use(express.static(__dirname + '/public'));
     });
 
