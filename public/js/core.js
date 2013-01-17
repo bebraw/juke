@@ -42,6 +42,7 @@ $(function() {
 
     updateInfo();
   });
+  komponist.once('ready', updateInfo);
 
   checkInputs($channelTpl);
   checkSelected();
