@@ -1,5 +1,8 @@
 var komponist = require('komponist');
 var express = require('express');
+var shoe = require('shoe');
+
+try { net = require('net'); } catch(e) {}
 
 var http = require('http');
 var path = require('path');
@@ -15,13 +18,27 @@ function main(conf) {
             .use(express.static(__dirname + '/public'));
     });
 
-    server.listen(conf.ports.server, function() {
-        console.log('juke server running at port ' + conf.ports.server);
-    });
-
     server.get('/', function(req, res) {
         res.redirect('index.html');
     });
 
-    komponist.install(server, 'localhost', conf.ports.mpd);
+    var serv = server.listen(conf.ports.server, function() {
+        console.log('juke server running at port ' + conf.ports.server);
+    });
+
+    installKomponist(serv, conf.ports.mpd);
+}
+
+function installKomponist(server, port) {
+     var sock = shoe(function(stream) {
+        var client = net.createConnection('localhost', port);
+
+        client.pipe(stream);
+
+        stream.on('data', function(data) {
+            client.write(data);
+        });
+    });
+
+    sock.install(server, '/komponist');
 }

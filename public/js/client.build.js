@@ -4227,14 +4227,16 @@ if (typeof module === 'object' && module && module.exports) {
 
 });
 
-require.define("/src/client.js",function(require,module,exports,__dirname,__filename,process,global){var komponist = require('komponist');
+require.define("/public/js/client.js",function(require,module,exports,__dirname,__filename,process,global){var komponist = require('komponist');
 
 var client = komponist.createConnection(function(err, client) {
+    if(err) throw err;
+
     console.log('Connected to MPD!');
 });
 
 window.komponist = client;
 
 });
-require("/src/client.js");
+require("/public/js/client.js");
 })();
