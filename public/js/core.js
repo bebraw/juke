@@ -26,9 +26,6 @@ $(function() {
     komponist.toggle();
   })
 
-  // TODO: set visibility state whether or not playback is on
-  $('.pause').hide();
-
   var $channelTpl = getChannelTemplate();
   $(document).on('click', '.channel', function() {
     var $e = $(this);
@@ -51,6 +48,7 @@ $(function() {
   checkInputs($channelTpl);
   checkSelected();
   updateInfo();
+  updatePlayPause();
 });
 
 function getChannelTemplate() {
@@ -87,6 +85,13 @@ function updateInfo() {
     var info = [data.Name, data.Title].filter(id).join(' - ');
 
     $('.info').text(info);
+  });
+}
+
+function updatePlayPause() {
+  komponist.status(function(err, data) {
+    $('.play, .pause').show();
+    $('.' + data.state).hide();
   });
 }
 
