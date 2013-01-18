@@ -1,4 +1,8 @@
 $(function() {
+  var meta = {
+    currentSong: 0
+  };
+
   $('.edit').on('click', function() {
     var $opts = $('.options').toggleClass('visible');
 
@@ -8,22 +12,19 @@ $(function() {
   });
 
   $('.forward').on('click', function() {
-    MPDnext();
-
-    updateInfo();
+    nextSong(meta);
   });
 
   $('.backward').on('click', function() {
-    MPDprevious();
-
-    updateInfo();
+    previousSong(meta);
   });
 
   $('.play, .pause').on('click', function() {
     $('.play').toggle();
     $('.pause').toggle();
 
-    komponist.toggle();
+    if($('.play:visible').length) komponist.stop();
+    else komponist.play(meta.currentSong);
   });
 
   var $channelTpl = getChannelTemplate();
@@ -41,15 +42,15 @@ $(function() {
   komponist.on('changed', function(system) {
     if(system !== 'player') return;
 
-    updateInfo();
+    updateSong(meta);
   });
-  komponist.once('ready', updateInfo);
-
-  updateInfo();
-  updatePlayPause();
-  updatePlaylist($channelTpl, function() {
-    checkSelected();
-    checkInputs($channelTpl);
+  komponist.once('ready', function() {
+    updateSong(meta);
+    updatePlayPause();
+    updatePlaylist($channelTpl, function() {
+      checkSelected();
+      checkInputs($channelTpl);
+    });
   });
 });
 
@@ -78,9 +79,18 @@ function checkSelected($e) {
   if($e) $e.addClass('selected');
 }
 
-function updateInfo() {
+function updateSong(meta) {
   komponist.currentsong(function(err, data) {
-    var info = [data.Name, data.Title].filter(id).join(' - ');
+    meta.currentSong = parseInt(data.Pos, 10);
+
+    updateInfo(meta);
+  });
+}
+
+function updateInfo(meta) {
+  komponist.playlistid(function(err, data) {
+    var d = data[meta.currentSong];
+    var info = [d.Name, d.Title].filter(id).join(' - ');
 
     $('.info').text(info);
   });
@@ -88,8 +98,10 @@ function updateInfo() {
 
 function updatePlayPause() {
   komponist.status(function(err, data) {
+    var state = data.state == 'play'? 'play': 'pause';
+
     $('.play, .pause').show();
-    $('.' + data.state).hide();
+    $('.' + state).hide();
   });
 }
 
@@ -111,16 +123,26 @@ function updatePlaylist($tpl, done) {
   });
 }
 
-function MPDnext() {
-  komponist.playlistinfo(function(err, data) {
-    console.log(data);
-  });
+function nextSong(meta) {
+  komponist.playlistid(function(err, data) {
+    meta.currentSong++;
 
-  //komponist.next();
+    if(meta.currentSong == data.length) meta.currentSong = 0;
+
+    komponist.play(meta.currentSong);
+    updateInfo(meta);
+  });
 }
 
-function MPDprevious() {
-  komponist.previous();
+function previousSong(meta) {
+  komponist.playlistid(function(err, data) {
+    meta.currentSong--;
+
+    if(meta.currentSong < 0) meta.currentSong = data.length - 1;
+
+    komponist.play(meta.currentSong);
+    updateInfo(meta);
+  });
 }
 
 function id(a) {return a;}
