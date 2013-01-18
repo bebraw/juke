@@ -60,6 +60,10 @@ body {
   vertical-align: -20%;
 }
 
+.pause.button .icon::before {
+  vertical-align: -20%;
+}
+
 .big.button {
   width: 6em;
   height: 6em;
