@@ -81,23 +81,16 @@ body {
   overflow: auto;
 }
 
-.edit.button {
-  float: right;
-
-  margin: 0.5em;
-  cursor: default;
-}
-
-.edit.button .icon {
-  margin-right: 0.2em;
-}
-
 .backward.button .icon {
   margin-right: 0.6em;
 }
 
 .pause.button .icon {
   margin-right: 0.1em;
+}
+
+.edit .icon {
+  color: #333;
 }
 
 /* General Layout */
@@ -112,7 +105,7 @@ body {
 
 .controls {
   padding-top: 0.5em;
-  padding-bottom: 1em;
+  padding-bottom: 1.5em;
   text-align: center;
 
   background: -webkit-linear-gradient(top, #666, #444);
@@ -154,6 +147,8 @@ body {
 }
 
 .footer {
+  padding: 0.5em;
   background: -webkit-linear-gradient(top, #555, #777);
   border-radius: 0 0 0.5em 0.5em;
+  text-align: center;
 }

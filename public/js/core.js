@@ -3,7 +3,7 @@ $(function() {
     currentSong: 0
   };
 
-  $('.edit').on('click', function() {
+  $('.footer').on('click', function() {
     var $opts = $('.options').toggleClass('visible');
 
     $opts.animate({
