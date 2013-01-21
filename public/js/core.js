@@ -45,6 +45,12 @@ var components = {
         if($('.play:visible').length) komponist.stop();
         else komponist.play(meta.currentSong);
       });
+    },
+    update: function() {
+      playerState(function(err, state) {
+        $('.play, .pause').show();
+        $('.' + state).hide();
+      });
     }
   },
   channels: {
@@ -86,6 +92,27 @@ var components = {
       meta.currentSong = id;
     }
   },
+  song: {
+    init: noop,
+    update: function(meta) {
+      komponist.currentsong(function(err, data) {
+        meta.currentSong = parseInt(data.Pos, 10);
+
+        components.info.update(meta);
+      });
+    }
+  },
+  info: {
+    init: noop,
+    update: function(meta) {
+      komponist.playlistid(function(err, data) {
+        var d = data[meta.currentSong];
+        var info = [d.Name, d.Title].filter(id).join(' - ');
+
+        $('.info').text(info);
+      });
+    }
+  },
   komponist: {
     init: function(meta) {
       var $channelTpl = templates.channel();
@@ -93,11 +120,11 @@ var components = {
       komponist.on('changed', function(system) {
         if(system !== 'player') return;
 
-        updateSong(meta);
+        components.song.update(meta);
       });
       komponist.once('ready', function() {
-        updateSong(meta);
-        updatePlayPause();
+        components.song.update(meta);
+        components.playPause.update();
 
         createPlaylist($channelTpl, function() {
           updatePlaylist(meta);
@@ -113,30 +140,6 @@ var templates = {
     return $('.channel:first').parent().clone();
   }
 };
-
-function updateSong(meta) {
-  komponist.currentsong(function(err, data) {
-    meta.currentSong = parseInt(data.Pos, 10);
-
-    updateInfo(meta);
-  });
-}
-
-function updateInfo(meta) {
-  komponist.playlistid(function(err, data) {
-    var d = data[meta.currentSong];
-    var info = [d.Name, d.Title].filter(id).join(' - ');
-
-    $('.info').text(info);
-  });
-}
-
-function updatePlayPause() {
-  playerState(function(err, state) {
-    $('.play, .pause').show();
-    $('.' + state).hide();
-  });
-}
 
 function createPlaylist($tpl, done) {
   komponist.playlistinfo(function(err, data) {
@@ -168,7 +171,7 @@ function nextSong(meta) {
     if(meta.currentSong == data.length) meta.currentSong = 0;
 
     resume(meta.currentSong);
-    updateInfo(meta);
+    components.info.update(meta);
     updatePlaylist(meta);
   });
 }
@@ -180,7 +183,7 @@ function previousSong(meta) {
     if(meta.currentSong < 0) meta.currentSong = data.length - 1;
 
     resume(meta.currentSong);
-    updateInfo(meta);
+    components.info.update(meta);
     updatePlaylist(meta);
   });
 }
@@ -198,3 +201,4 @@ function playerState(cb) {
 }
 
 function id(a) {return a;}
+function noop() {}
