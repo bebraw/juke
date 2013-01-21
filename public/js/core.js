@@ -3,29 +3,7 @@ $(function() {
     currentSong: 0
   };
 
-  $('.footer').on('click', function() {
-    var $opts = $('.options').toggleClass('visible');
-
-    $opts.animate({
-      'max-height': $opts.hasClass('visible')? '1000px': 0
-    });
-  });
-
-  $('.forward').on('click', function() {
-    nextSong(meta);
-  });
-
-  $('.backward').on('click', function() {
-    previousSong(meta);
-  });
-
-  $('.play, .pause').on('click', function() {
-    $('.play').toggle();
-    $('.pause').toggle();
-
-    if($('.play:visible').length) komponist.stop();
-    else komponist.play(meta.currentSong);
-  });
+  initialize(components, meta);
 
   var $channelTpl = getChannelTemplate();
   $(document).on('click', '.channel', function() {
@@ -54,6 +32,41 @@ $(function() {
     });
   });
 });
+
+function initialize(components, meta) {
+  for(var name in components) components[name](meta);
+}
+
+var components = {
+  footer: function() {
+    $('.footer').on('click', function() {
+      var $opts = $('.options').toggleClass('visible');
+
+      $opts.animate({
+        'max-height': $opts.hasClass('visible')? '1000px': 0
+      });
+    });
+  },
+  forward: function(meta) {
+    $('.forward').on('click', function() {
+      nextSong(meta);
+    });
+  },
+  backward: function(meta) {
+    $('.backward').on('click', function() {
+      previousSong(meta);
+    });
+  },
+  playPause: function(meta) {
+    $('.play, .pause').on('click', function() {
+      $('.play').toggle();
+      $('.pause').toggle();
+
+      if($('.play:visible').length) komponist.stop();
+      else komponist.play(meta.currentSong);
+    });
+  }
+};
 
 function getChannelTemplate() {
   return $('.channel:first').parent().clone();
