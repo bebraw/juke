@@ -40,7 +40,7 @@ var components = {
     });
   },
   channels: function(meta) {
-    var $channelTpl = getChannelTemplate();
+    var $channelTpl = templates.channel();
 
     $(document).on('click', '.channel', function() {
       var $e = $(this);
@@ -55,7 +55,7 @@ var components = {
     });
   },
   komponist: function(meta) {
-  var $channelTpl = getChannelTemplate();
+    var $channelTpl = templates.channel();
 
     komponist.on('changed', function(system) {
       if(system !== 'player') return;
@@ -74,9 +74,11 @@ var components = {
   }
 };
 
-function getChannelTemplate() {
-  return $('.channel:first').parent().clone();
-}
+var templates = {
+  channel: function() {
+    return $('.channel:first').parent().clone();
+  }
+};
 
 function checkInputs($tpl, $e) {
   var empties = $('.channel').filter(function(i, e) {
