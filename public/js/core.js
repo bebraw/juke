@@ -43,13 +43,10 @@ var components = {
     }
   },
   playPause: {
-    init: function(meta) {
+    init: function() {
       $('.play, .pause').on('click', function() {
-        $('.play').toggle();
-        $('.pause').toggle();
-
-        if($('.play:visible').length) komponist.stop();
-        else komponist.play(meta.currentSong);
+        $('.play, .pause').toggle();
+        playlist.toggle();
       });
     },
     update: function() {
@@ -61,7 +58,7 @@ var components = {
   },
   channels: {
     init: function(meta) {
-      var $channelTpl = templates.channel();
+      var $tpl = templates.channel();
 
       $(document).on('click', '.channel', function() {
         var $e = $(this);
@@ -71,7 +68,7 @@ var components = {
       }).on('keyup', function() {
         var $e = $(this);
 
-        components.channels.check($channelTpl, $e);
+        components.channels.check($tpl, $e);
         components.channels.select($e, meta);
       });
     },
@@ -125,7 +122,7 @@ var components = {
   },
   komponist: {
     init: function(meta) {
-      var $channelTpl = templates.channel();
+      var $tpl = templates.channel();
 
       komponist.on('changed', function(system) {
         if(system !== 'player') return;
@@ -136,9 +133,21 @@ var components = {
         components.song.update(meta);
         components.playPause.update();
 
-        playlist.create($channelTpl, function() {
+        playlist.get(function(err, data) {
+          var $c = $('.channels');
+
+          $c.empty();
+
+          $.each(data, function(i, v) {
+            var $e = $tpl.clone();
+
+            $('.channel', $e).val(v.file);
+
+            $c.append($e);
+          });
+
           components.channels.update(meta);
-          components.channels.check($channelTpl);
+          components.channels.check($tpl);
         });
       });
     }
@@ -152,22 +161,8 @@ var templates = {
 };
 
 var playlist = {
-  create: function($tpl, done) {
-    komponist.playlistinfo(function(err, data) {
-      var $c = $('.channels');
-
-      $c.empty();
-
-      $.each(data, function(i, v) {
-        var $e = $tpl.clone();
-
-        $('.channel', $e).val(v.file);
-
-        $c.append($e);
-      });
-
-      done();
-    });
+  get: function(done) {
+    komponist.playlistinfo(done);
   },
   next: function(meta, done) {
     komponist.playlistid(function(err, data) {
@@ -187,6 +182,12 @@ var playlist = {
 
       playlist.resume(meta.currentSong);
       done();
+    });
+  },
+  toggle: function(song) {
+    playlist.state(function(err, state) {
+      if(state == 'play') komponist.stop();
+      else komponist.play();
     });
   },
   resume: function(song) {
