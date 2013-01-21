@@ -25,14 +25,20 @@ var components = {
   forward: {
     init: function(meta) {
       $('.forward').on('click', function() {
-        playlist.next(meta);
+        playlist.next(meta, function() {
+          components.info.update(meta);
+          components.channels.update(meta);
+        });
       });
     }
   },
   backward: {
     init: function(meta) {
       $('.backward').on('click', function() {
-        playlist.previous(meta);
+        playlist.previous(meta, function() {
+          components.info.update(meta);
+          components.channels.update(meta);
+        });
       });
     }
   },
@@ -163,26 +169,24 @@ var playlist = {
       done();
     });
   },
-  next: function(meta) {
+  next: function(meta, done) {
     komponist.playlistid(function(err, data) {
       meta.currentSong++;
 
       if(meta.currentSong == data.length) meta.currentSong = 0;
 
       playlist.resume(meta.currentSong);
-      components.info.update(meta);
-      components.channels.update(meta);
+      done();
     });
   },
-  previous: function(meta) {
+  previous: function(meta, done) {
     komponist.playlistid(function(err, data) {
       meta.currentSong--;
 
       if(meta.currentSong < 0) meta.currentSong = data.length - 1;
 
       playlist.resume(meta.currentSong);
-      components.info.update(meta);
-      components.channels.update(meta);
+      done();
     });
   },
   resume: function(song) {
