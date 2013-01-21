@@ -31,12 +31,13 @@ $(function() {
   $(document).on('click', '.channel', function() {
     var $e = $(this);
 
-    selectChannel($e);
+    selectChannel($e, meta);
+    resume(meta.currentSong);
   }).on('keyup', function() {
     var $e = $(this);
 
     checkInputs($channelTpl, $e);
-    selectChannel($e);
+    selectChannel($e, meta);
   });
 
   komponist.on('changed', function(system) {
@@ -71,9 +72,15 @@ function checkInputs($tpl, $e) {
   }
 }
 
-function selectChannel($e) {
+function selectChannel($e, meta) {
   $('.channel').removeClass('selected');
   if($e) $e.addClass('selected');
+
+  var id = $e.parent().index();
+  var emptyId = $('channel[value=""]:first').parent().index();
+  if(-1 < emptyId && emptyId < id) id--;
+
+  meta.currentSong = id;
 }
 
 function updateSong(meta) {
@@ -129,7 +136,7 @@ function nextSong(meta) {
 
     if(meta.currentSong == data.length) meta.currentSong = 0;
 
-    resume(meta);
+    resume(meta.currentSong);
     updateInfo(meta);
     updatePlaylist(meta);
   });
@@ -141,15 +148,15 @@ function previousSong(meta) {
 
     if(meta.currentSong < 0) meta.currentSong = data.length - 1;
 
-    resume(meta);
+    resume(meta.currentSong);
     updateInfo(meta);
     updatePlaylist(meta);
   });
 }
 
-function resume(meta) {
+function resume(song) {
   playerState(function(err, state) {
-    if(state == 'play') komponist.play(meta.currentSong);
+    if(state == 'play') komponist.play(song);
   });
 }
 
