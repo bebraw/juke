@@ -94,9 +94,7 @@ function updateInfo(meta) {
 }
 
 function updatePlayPause() {
-  komponist.status(function(err, data) {
-    var state = data.state == 'play'? 'play': 'pause';
-
+  playerState(function(err, state) {
     $('.play, .pause').show();
     $('.' + state).hide();
   });
@@ -131,7 +129,7 @@ function nextSong(meta) {
 
     if(meta.currentSong == data.length) meta.currentSong = 0;
 
-    komponist.play(meta.currentSong);
+    resume(meta);
     updateInfo(meta);
     updatePlaylist(meta);
   });
@@ -143,9 +141,21 @@ function previousSong(meta) {
 
     if(meta.currentSong < 0) meta.currentSong = data.length - 1;
 
-    komponist.play(meta.currentSong);
+    resume(meta);
     updateInfo(meta);
     updatePlaylist(meta);
+  });
+}
+
+function resume(meta) {
+  playerState(function(err, state) {
+    if(state == 'play') komponist.play(meta.currentSong);
+  });
+}
+
+function playerState(cb) {
+  komponist.status(function(err, data) {
+    cb(err, data.state == 'play'? 'play': 'pause');
   });
 }
 
