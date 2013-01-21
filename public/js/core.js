@@ -47,7 +47,7 @@ $(function() {
   komponist.once('ready', function() {
     updateSong(meta);
     updatePlayPause();
-    updatePlaylist($channelTpl, function() {
+    createPlaylist($channelTpl, function() {
       checkSelected();
       checkInputs($channelTpl);
     });
@@ -105,7 +105,7 @@ function updatePlayPause() {
   });
 }
 
-function updatePlaylist($tpl, done) {
+function createPlaylist($tpl, done) {
   komponist.playlistinfo(function(err, data) {
     var $c = $('.channels');
 
@@ -123,6 +123,11 @@ function updatePlaylist($tpl, done) {
   });
 }
 
+function updatePlaylist(meta) {
+  $('.channel').removeClass('selected');
+  $('.channel[value!=""]').eq(meta.currentSong).addClass('selected');
+}
+
 function nextSong(meta) {
   komponist.playlistid(function(err, data) {
     meta.currentSong++;
@@ -131,6 +136,7 @@ function nextSong(meta) {
 
     komponist.play(meta.currentSong);
     updateInfo(meta);
+    updatePlaylist(meta);
   });
 }
 
@@ -142,6 +148,7 @@ function previousSong(meta) {
 
     komponist.play(meta.currentSong);
     updateInfo(meta);
+    updatePlaylist(meta);
   });
 }
 
