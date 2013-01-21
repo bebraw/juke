@@ -4,33 +4,6 @@ $(function() {
   };
 
   initialize(components, meta);
-
-  var $channelTpl = getChannelTemplate();
-  $(document).on('click', '.channel', function() {
-    var $e = $(this);
-
-    selectChannel($e, meta);
-    resume(meta.currentSong);
-  }).on('keyup', function() {
-    var $e = $(this);
-
-    checkInputs($channelTpl, $e);
-    selectChannel($e, meta);
-  });
-
-  komponist.on('changed', function(system) {
-    if(system !== 'player') return;
-
-    updateSong(meta);
-  });
-  komponist.once('ready', function() {
-    updateSong(meta);
-    updatePlayPause();
-    createPlaylist($channelTpl, function() {
-      updatePlaylist(meta);
-      checkInputs($channelTpl);
-    });
-  });
 });
 
 function initialize(components, meta) {
@@ -64,6 +37,39 @@ var components = {
 
       if($('.play:visible').length) komponist.stop();
       else komponist.play(meta.currentSong);
+    });
+  },
+  channels: function(meta) {
+    var $channelTpl = getChannelTemplate();
+
+    $(document).on('click', '.channel', function() {
+      var $e = $(this);
+
+      selectChannel($e, meta);
+      resume(meta.currentSong);
+    }).on('keyup', function() {
+      var $e = $(this);
+
+      checkInputs($channelTpl, $e);
+      selectChannel($e, meta);
+    });
+  },
+  komponist: function(meta) {
+  var $channelTpl = getChannelTemplate();
+
+    komponist.on('changed', function(system) {
+      if(system !== 'player') return;
+
+      updateSong(meta);
+    });
+    komponist.once('ready', function() {
+      updateSong(meta);
+      updatePlayPause();
+
+      createPlaylist($channelTpl, function() {
+        updatePlaylist(meta);
+        checkInputs($channelTpl);
+      });
     });
   }
 };
