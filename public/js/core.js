@@ -25,14 +25,14 @@ var components = {
   forward: {
     init: function(meta) {
       $('.forward').on('click', function() {
-        nextSong(meta);
+        playlist.next(meta);
       });
     }
   },
   backward: {
     init: function(meta) {
       $('.backward').on('click', function() {
-        previousSong(meta);
+        playlist.previous(meta);
       });
     }
   },
@@ -47,7 +47,7 @@ var components = {
       });
     },
     update: function() {
-      playerState(function(err, state) {
+      playlist.state(function(err, state) {
         $('.play, .pause').show();
         $('.' + state).hide();
       });
@@ -61,7 +61,7 @@ var components = {
         var $e = $(this);
 
         components.channels.select($e, meta);
-        resume(meta.currentSong);
+        playlist.resume(meta.currentSong);
       }).on('keyup', function() {
         var $e = $(this);
 
@@ -90,6 +90,10 @@ var components = {
       if(-1 < emptyId && emptyId < id) id--;
 
       meta.currentSong = id;
+    },
+    update: function(meta) {
+      $('.channel').removeClass('selected');
+      $('.channel[value!=""]').eq(meta.currentSong).addClass('selected');
     }
   },
   song: {
@@ -126,8 +130,8 @@ var components = {
         components.song.update(meta);
         components.playPause.update();
 
-        createPlaylist($channelTpl, function() {
-          updatePlaylist(meta);
+        playlist.create($channelTpl, function() {
+          components.channels.update(meta);
           components.channels.check($channelTpl);
         });
       });
@@ -141,64 +145,57 @@ var templates = {
   }
 };
 
-function createPlaylist($tpl, done) {
-  komponist.playlistinfo(function(err, data) {
-    var $c = $('.channels');
+var playlist = {
+  create: function($tpl, done) {
+    komponist.playlistinfo(function(err, data) {
+      var $c = $('.channels');
 
-    $c.empty();
+      $c.empty();
 
-    $.each(data, function(i, v) {
+      $.each(data, function(i, v) {
         var $e = $tpl.clone();
 
         $('.channel', $e).val(v.file);
 
         $c.append($e);
+      });
+
+      done();
     });
+  },
+  next: function(meta) {
+    komponist.playlistid(function(err, data) {
+      meta.currentSong++;
 
-    done();
-  });
-}
+      if(meta.currentSong == data.length) meta.currentSong = 0;
 
-function updatePlaylist(meta) {
-  $('.channel').removeClass('selected');
-  $('.channel[value!=""]').eq(meta.currentSong).addClass('selected');
-}
+      playlist.resume(meta.currentSong);
+      components.info.update(meta);
+      components.channels.update(meta);
+    });
+  },
+  previous: function(meta) {
+    komponist.playlistid(function(err, data) {
+      meta.currentSong--;
 
-function nextSong(meta) {
-  komponist.playlistid(function(err, data) {
-    meta.currentSong++;
+      if(meta.currentSong < 0) meta.currentSong = data.length - 1;
 
-    if(meta.currentSong == data.length) meta.currentSong = 0;
-
-    resume(meta.currentSong);
-    components.info.update(meta);
-    updatePlaylist(meta);
-  });
-}
-
-function previousSong(meta) {
-  komponist.playlistid(function(err, data) {
-    meta.currentSong--;
-
-    if(meta.currentSong < 0) meta.currentSong = data.length - 1;
-
-    resume(meta.currentSong);
-    components.info.update(meta);
-    updatePlaylist(meta);
-  });
-}
-
-function resume(song) {
-  playerState(function(err, state) {
-    if(state == 'play') komponist.play(song);
-  });
-}
-
-function playerState(cb) {
-  komponist.status(function(err, data) {
-    cb(err, data.state == 'play'? 'play': 'pause');
-  });
-}
+      playlist.resume(meta.currentSong);
+      components.info.update(meta);
+      components.channels.update(meta);
+    });
+  },
+  resume: function(song) {
+    playlist.state(function(err, state) {
+      if(state == 'play') komponist.play(song);
+    });
+  },
+  state: function(cb) {
+    komponist.status(function(err, data) {
+      cb(err, data.state == 'play'? 'play': 'pause');
+    });
+  }
+};
 
 function id(a) {return a;}
 function noop() {}
