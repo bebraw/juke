@@ -43,10 +43,10 @@ var components = {
     }
   },
   playPause: {
-    init: function() {
+    init: function(meta) {
       $('.play, .pause').on('click', function() {
         $('.play, .pause').toggle();
-        playlist.toggle();
+        playlist.toggle(meta.currentSong);
       });
     },
     update: function() {
@@ -209,14 +209,20 @@ var playlist = {
   },
   toggle: function(song) {
     playlist.state(function(err, state) {
-      if(state == 'play') komponist.stop();
-      else komponist.play();
+      if(state == 'play') playlist.stop();
+      else playlist.play(song);
     });
   },
   resume: function(song) {
     playlist.state(function(err, state) {
-      if(state == 'play') komponist.play(song);
+      if(state == 'play') playlist.play(song);
     });
+  },
+  play: function(song) {
+    komponist.play(song);
+  },
+  stop: function() {
+    komponist.stop();
   },
   state: function(cb) {
     komponist.status(function(err, data) {
