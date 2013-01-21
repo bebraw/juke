@@ -31,12 +31,12 @@ $(function() {
   $(document).on('click', '.channel', function() {
     var $e = $(this);
 
-    checkSelected($e);
+    selectChannel($e);
   }).on('keyup', function() {
     var $e = $(this);
 
     checkInputs($channelTpl, $e);
-    checkSelected($e);
+    selectChannel($e);
   });
 
   komponist.on('changed', function(system) {
@@ -48,7 +48,7 @@ $(function() {
     updateSong(meta);
     updatePlayPause();
     createPlaylist($channelTpl, function() {
-      checkSelected();
+      updatePlaylist(meta);
       checkInputs($channelTpl);
     });
   });
@@ -71,11 +71,8 @@ function checkInputs($tpl, $e) {
   }
 }
 
-function checkSelected($e) {
-  var $ch = $('.selected.channel:first');
-
+function selectChannel($e) {
   $('.channel').removeClass('selected');
-  if(!$ch.length) $('.channel:first').addClass('selected');
   if($e) $e.addClass('selected');
 }
 
