@@ -14,6 +14,7 @@ body {
 .app {
   margin: 1em;
   max-width: 500px;
+  min-width: 300px;
 
   border-radius: 0.5em;
 }
@@ -89,7 +90,7 @@ body {
   margin-right: 0.1em;
 }
 
-.edit .icon {
+.footer .icon {
   color: #333;
 }
 
@@ -135,11 +136,16 @@ body {
   list-style: none;
 }
 
-.options input {
-  width: 100%;
+.options .channels input {
+  width: 90%;
   border-radius: 0.5em;
   border: 2px solid #bbb;
   background: #cdc;
+}
+
+.options .channels .edit {
+  float: right;
+  margin-top: 0.2em;
 }
 
 .options .selected.channel {

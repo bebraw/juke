@@ -63,8 +63,9 @@ var components = {
       $(document).on('click', '.channel', function() {
         var $e = $(this);
 
-        components.channels.select($e, meta);
-        playlist.resume(meta.currentSong);
+        if(components.channels.select($e, meta)) {
+          playlist.resume(meta.currentSong);
+        }
       }).on('keyup', function() {
         var $e = $(this);
 
@@ -85,6 +86,8 @@ var components = {
       }
     },
     select: function($e, meta) {
+      if(!$e.val().trim()) return;
+
       $('.channel').removeClass('selected');
       if($e) $e.addClass('selected');
 
@@ -93,6 +96,8 @@ var components = {
       if(-1 < emptyId && emptyId < id) id--;
 
       meta.currentSong = id;
+
+      return true;
     },
     update: function(meta) {
       $('.channel').removeClass('selected');
@@ -106,6 +111,24 @@ var components = {
         meta.currentSong = parseInt(data.Pos, 10);
 
         components.info.update(meta);
+      });
+    }
+  },
+  edit: {
+    init: function() {
+      $(document).on('click', '.channels .edit', function(i, e) {
+        var $e = $(this);
+        var $ch = $e.siblings('.channel:first');
+        var name = $ch.data('name');
+        var url = $ch.data('url');
+
+        if($ch.prop('readonly')) {
+          $ch.val(url).prop('readonly', false);
+        }
+        else {
+          $ch.data('url', $ch.val()).val(name).prop('readonly', true);
+          // TODO: update playlist item now
+        }
       });
     }
   },
@@ -141,7 +164,7 @@ var components = {
           $.each(data, function(i, v) {
             var $e = $tpl.clone();
 
-            $('.channel', $e).val(v.file);
+            $('.channel', $e).val(v.Name).data({name: v.Name, url: v.file});
 
             $c.append($e);
           });
