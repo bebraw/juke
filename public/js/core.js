@@ -7,70 +7,104 @@ $(function() {
 });
 
 function initialize(components, meta) {
-  for(var name in components) components[name](meta);
+  for(var name in components) components[name].init(meta);
 }
 
 var components = {
-  footer: function() {
-    $('.footer').on('click', function() {
-      var $opts = $('.options').toggleClass('visible');
+  footer: {
+    init: function() {
+      $('.footer').on('click', function() {
+        var $opts = $('.options').toggleClass('visible');
 
-      $opts.animate({
-        'max-height': $opts.hasClass('visible')? '1000px': 0
+        $opts.animate({
+          'max-height': $opts.hasClass('visible')? '1000px': 0
+        });
       });
-    });
+    }
   },
-  forward: function(meta) {
-    $('.forward').on('click', function() {
-      nextSong(meta);
-    });
-  },
-  backward: function(meta) {
-    $('.backward').on('click', function() {
-      previousSong(meta);
-    });
-  },
-  playPause: function(meta) {
-    $('.play, .pause').on('click', function() {
-      $('.play').toggle();
-      $('.pause').toggle();
-
-      if($('.play:visible').length) komponist.stop();
-      else komponist.play(meta.currentSong);
-    });
-  },
-  channels: function(meta) {
-    var $channelTpl = templates.channel();
-
-    $(document).on('click', '.channel', function() {
-      var $e = $(this);
-
-      selectChannel($e, meta);
-      resume(meta.currentSong);
-    }).on('keyup', function() {
-      var $e = $(this);
-
-      checkInputs($channelTpl, $e);
-      selectChannel($e, meta);
-    });
-  },
-  komponist: function(meta) {
-    var $channelTpl = templates.channel();
-
-    komponist.on('changed', function(system) {
-      if(system !== 'player') return;
-
-      updateSong(meta);
-    });
-    komponist.once('ready', function() {
-      updateSong(meta);
-      updatePlayPause();
-
-      createPlaylist($channelTpl, function() {
-        updatePlaylist(meta);
-        checkInputs($channelTpl);
+  forward: {
+    init: function(meta) {
+      $('.forward').on('click', function() {
+        nextSong(meta);
       });
-    });
+    }
+  },
+  backward: {
+    init: function(meta) {
+      $('.backward').on('click', function() {
+        previousSong(meta);
+      });
+    }
+  },
+  playPause: {
+    init: function(meta) {
+      $('.play, .pause').on('click', function() {
+        $('.play').toggle();
+        $('.pause').toggle();
+
+        if($('.play:visible').length) komponist.stop();
+        else komponist.play(meta.currentSong);
+      });
+    }
+  },
+  channels: {
+    init: function(meta) {
+      var $channelTpl = templates.channel();
+
+      $(document).on('click', '.channel', function() {
+        var $e = $(this);
+
+        components.channels.select($e, meta);
+        resume(meta.currentSong);
+      }).on('keyup', function() {
+        var $e = $(this);
+
+        components.channels.check($channelTpl, $e);
+        components.channels.select($e, meta);
+      });
+    },
+    check: function($tpl, $e) {
+      var empties = $('.channel').filter(function(i, e) {
+        return $(e).val().trim().length === 0;
+      });
+
+      if(!empties.length) {
+        $('.channels').append($tpl.clone());
+      }
+      if(empties.length > 1) {
+        empties.not($e).remove();
+      }
+    },
+    select: function($e, meta) {
+      $('.channel').removeClass('selected');
+      if($e) $e.addClass('selected');
+
+      var id = $e.parent().index();
+      var emptyId = $('channel[value=""]:first').parent().index();
+      if(-1 < emptyId && emptyId < id) id--;
+
+      meta.currentSong = id;
+    }
+  },
+  komponist: {
+    init: function(meta) {
+      var $channelTpl = templates.channel();
+
+      komponist.on('changed', function(system) {
+        if(system !== 'player') return;
+
+        updateSong(meta);
+      });
+      komponist.once('ready', function() {
+        updateSong(meta);
+        updatePlayPause();
+
+        createPlaylist($channelTpl, function() {
+          updatePlaylist(meta);
+          components.channels.check($channelTpl);
+        });
+      });
+    }
   }
 };
 
@@ -79,30 +113,6 @@ var templates = {
     return $('.channel:first').parent().clone();
   }
 };
-
-function checkInputs($tpl, $e) {
-  var empties = $('.channel').filter(function(i, e) {
-    return $(e).val().trim().length === 0;
-  });
-
-  if(!empties.length) {
-    $('.channels').append($tpl.clone());
-  }
-  if(empties.length > 1) {
-    empties.not($e).remove();
-  }
-}
-
-function selectChannel($e, meta) {
-  $('.channel').removeClass('selected');
-  if($e) $e.addClass('selected');
-
-  var id = $e.parent().index();
-  var emptyId = $('channel[value=""]:first').parent().index();
-  if(-1 < emptyId && emptyId < id) id--;
-
-  meta.currentSong = id;
-}
 
 function updateSong(meta) {
   komponist.currentsong(function(err, data) {
