@@ -6,7 +6,8 @@
 
   "dependencies": {
     "komponist": "== 0.0.3",
-    "node-static": "== 0.6.5"
+    "node-static": "== 0.6.5",
+    "icecast": "1.0.1"
   },
 
   "devDependencies": {

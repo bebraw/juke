@@ -201,7 +201,11 @@ var playlist = {
     komponist.playlistinfo(function(err, data) {
       parallel(function(d, cb) {
         playlist.stats(d.Pos, cb);
-      }, data, done);
+      }, data, function(err, data) {
+        done(err, data.sort(function(a, b) {
+          return parseInt(a.Pos, 10) > parseInt(b.Pos, 10);
+        }));
+      });
     });
   },
   next: function(meta, done) {
@@ -263,13 +267,19 @@ var playlist = {
     komponist['delete'](song, done);
   },
   stats: function(song, done) {
-    // try to get via status (should contain Name and file). if Name is missing, hack it
-    // XXX: won't update data if not playing already!
-    // implement some method that does that
-    // (vol 0 -> play -> stats -> stop -> vol back)
     komponist.playlistid(function(err, data) {
-      done(err, data[song]);
-    });
+      var s = data[song];
+
+      $.getJSON('/channel_meta?url=' + s.file, function(data) {
+        s.Name = data['icy-name'];
+        s.Genre = data['icy-genre'];
+        s.Bitrate = data['icy-br'];
+
+        done(err, s);
+      }, function(jqXHR, textStatus, errorThrown) {
+        alert('error ' + textStatus + " " + errorThrown);
+     });
+   });
   }
 };
 
