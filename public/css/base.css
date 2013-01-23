@@ -152,6 +152,10 @@ body {
   background: #aea;
 }
 
+.options .edited.channel {
+  background: #f38886;
+}
+
 .footer {
   padding: 0.5em;
   background: -webkit-linear-gradient(top, #555, #777);

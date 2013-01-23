@@ -60,30 +60,58 @@ var components = {
     init: function(meta) {
       var $tpl = templates.channel();
 
-      $(document).on('click', '.channel', function() {
+      $(document).on('click change', '.channel', function() {
         var $e = $(this);
 
-        if(components.channels.select($e, meta)) {
-          playlist.resume(meta.currentSong);
+        if(!$e.hasClass('edited')) components.channels.select($e, meta);
+        else {
+          url = $e.val();
+
+          if(url.trim().length > 0) {
+            console.log($e.index(), $('.channel').length);
+            if($e.index() + 1 == $('.channel').length) {
+              playlist.add(url, function() {
+                components.channels.add();
+
+                playlist.stats(meta.currentSong, function(err, data) {
+                  console.log(data);
+                  $e.data({name: data.Name, url: url});
+                });
+                playlist.resume(meta.currentSong);
+              });
+            }
+            else {
+              playlist.update(meta.currentSong, url, function() {
+                playlist.resume(meta.currentSong);
+              });
+            }
+          }
+          else {
+            $e.remove();
+            playlist.del(meta.currentSong);
+          }
         }
-      }).on('keyup', function() {
-        var $e = $(this);
-
-        components.channels.check($tpl, $e);
-        components.channels.select($e, meta);
       });
     },
-    check: function($tpl, $e) {
-      var empties = $('.channel').filter(function(i, e) {
-        return $(e).val().trim().length === 0;
-      });
+    populate: function(meta) {
+      playlist.get(function(err, data) {
+        console.log('populate', data);
+        $('.channels').empty();
 
-      if(!empties.length) {
-        $('.channels').append($tpl.clone());
-      }
-      if(empties.length > 1) {
-        empties.not($e).remove();
-      }
+        $.each(data, function(i, v) {
+          components.channels.add(v.Name, v.file);
+        });
+
+        components.channels.add();
+
+        components.channels.update(meta);
+      });
+    },
+    add: function(name, url) {
+      var $e = templates.channel();
+      $('.channel', $e).val(name).data({name: name, url: url});
+
+      $('.channels').append($e);
     },
     select: function($e, meta) {
       if(!$e.val().trim()) return;
@@ -97,7 +125,7 @@ var components = {
 
       meta.currentSong = id;
 
-      return true;
+      playlist.resume(meta.currentSong);
     },
     update: function(meta) {
       $('.channel').removeClass('selected');
@@ -123,11 +151,10 @@ var components = {
         var url = $ch.data('url');
 
         if($ch.prop('readonly')) {
-          $ch.val(url).prop('readonly', false);
+          $ch.val(url).prop('readonly', false).addClass('edited');
         }
         else {
-          $ch.data('url', $ch.val()).val(name).prop('readonly', true);
-          // TODO: update playlist item now
+          $ch.val(name).prop('readonly', true).trigger('change').removeClass('edited');
         }
       });
     }
@@ -145,8 +172,6 @@ var components = {
   },
   komponist: {
     init: function(meta) {
-      var $tpl = templates.channel();
-
       komponist.on('changed', function(system) {
         if(system !== 'player') return;
 
@@ -155,23 +180,7 @@ var components = {
       komponist.once('ready', function() {
         components.song.update(meta);
         components.playPause.update();
-
-        playlist.get(function(err, data) {
-          var $c = $('.channels');
-
-          $c.empty();
-
-          $.each(data, function(i, v) {
-            var $e = $tpl.clone();
-
-            $('.channel', $e).val(v.Name).data({name: v.Name, url: v.file});
-
-            $c.append($e);
-          });
-
-          components.channels.update(meta);
-          components.channels.check($tpl);
-        });
+        components.channels.populate(meta);
       });
     }
   }
@@ -179,22 +188,35 @@ var components = {
 
 var templates = {
   channel: function() {
-    return $('.channel:first').parent().clone();
+    return $('<li>' +
+        '<input type="text" class="channel" readonly="readonly" />' +
+        '<i class="icon icon-edit edit"></i>' +
+      '</li>'
+    );
   }
 };
 
 var playlist = {
   get: function(done) {
-    komponist.playlistinfo(done);
+    komponist.playlistinfo(function(err, data) {
+      parallel(function(d, cb) {
+        playlist.stats(d.Pos, cb);
+      }, data, done);
+    });
   },
   next: function(meta, done) {
-    komponist.playlistid(function(err, data) {
+    playlist.length(function(err, len) {
       meta.currentSong++;
 
-      if(meta.currentSong == data.length) meta.currentSong = 0;
+      if(meta.currentSong == len) meta.currentSong = 0;
 
       playlist.resume(meta.currentSong);
       done();
+    });
+  },
+  length: function(done) {
+    komponist.playlistid(function(err, data) {
+      done(err, data.length);
     });
   },
   previous: function(meta, done) {
@@ -213,9 +235,9 @@ var playlist = {
       else playlist.play(song);
     });
   },
-  resume: function(song) {
+  resume: function(song, done) {
     playlist.state(function(err, state) {
-      if(state == 'play') playlist.play(song);
+      if(state == 'play') playlist.play(song, done);
     });
   },
   play: function(song) {
@@ -224,12 +246,48 @@ var playlist = {
   stop: function() {
     komponist.stop();
   },
-  state: function(cb) {
+  state: function(done) {
     komponist.status(function(err, data) {
-      cb(err, data.state == 'play'? 'play': 'pause');
+      done(err, data.state == 'play'? 'play': 'pause');
+    });
+  },
+  add: function(url, done) {
+    komponist.add(url, done);
+  },
+  update: function(song, url, done) {
+    // TODO
+    console.log('update playlist song');
+    done();
+  },
+  del: function(song, done) {
+    komponist['delete'](song, done);
+  },
+  stats: function(song, done) {
+    // try to get via status (should contain Name and file). if Name is missing, hack it
+    // XXX: won't update data if not playing already!
+    // implement some method that does that
+    // (vol 0 -> play -> stats -> stop -> vol back)
+    komponist.playlistid(function(err, data) {
+      done(err, data[song]);
     });
   }
 };
+
+function parallel(operation, data, done) {
+  var accumData = [];
+
+  for(var i = 0, len = data.length; i < len; i++) {
+    operation(data[i], accumulate);
+  }
+
+  function accumulate(err, d) {
+    if(err) return done(err);
+
+    accumData.push(d);
+
+    if(accumData.length == len) done(null, accumData);
+  }
+}
 
 function id(a) {return a;}
 function noop() {}
