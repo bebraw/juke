@@ -68,13 +68,11 @@ var components = {
           url = $e.val();
 
           if(url.trim().length > 0) {
-            console.log($e.index(), $('.channel').length);
             if($e.index() + 1 == $('.channel').length) {
               playlist.add(url, function() {
                 components.channels.add();
 
                 playlist.stats(meta.currentSong, function(err, data) {
-                  console.log(data);
                   $e.data({name: data.Name, url: url});
                 });
                 playlist.resume(meta.currentSong);
@@ -95,7 +93,6 @@ var components = {
     },
     populate: function(meta) {
       playlist.get(function(err, data) {
-        console.log('populate', data);
         $('.channels').empty();
 
         $.each(data, function(i, v) {
